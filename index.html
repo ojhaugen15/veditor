@@ -1,4 +1,566 @@
 <html><head></head><body><script>
 //veditor
+ 
+character_width = 7.8
+font_size = 13
+font_color = 'white'
+font_style = 'Courier'
+editor_background = 'black'
+body_padding = 10
+breathing_room = 10
+storage_name = 'minivumojhaugen'
+cursor_opacity = '0.8'
+space_code = '&nbsp;'
+left_bracket = '&lt;'
+right_bracket = '&gt;'
+and_symbol = '&amp;'
+cursor_padding = 8
+interior_program = 'programojhaugen'
+
+command_mode = true
+nonline_elements = 2
+
+body_node = getValue(document, 'body')
+body_style = getValue(body_node, 'style')
+setValue(body_style, 'background', editor_background)
+setValue(body_style, 'color', font_color)
+setValue(body_style, 'fontSize', font_size)
+setValue(body_style, 'fontFamily', font_style)
+setValue(body_style, 'fontWeight', 'bold')
+
+cursor_element = document.createElement('div')
+cursor_style = getValue(cursor_element, 'style')
+body_node.appendChild(cursor_element)
+setValue(cursor_style, 'height', font_size)
+setValue(cursor_style, 'width', character_width)
+setValue(cursor_style, 'background', font_color)
+setValue(cursor_style, 'opacity', cursor_opacity)
+setValue(cursor_style, 'position', 'absolute')
+current_x = 0
+current_y = 0
+setCursor()
+
+current_line = addLine()
+body_node.addEventListener('keydown', executeAction)
+body_node.addEventListener('keyup', secondaryAction)
+
+function addLine (addAfter) {
+ new_line = document.createElement('div')
+ setValue(new_line, 'textContent')
+ line_style = getValue(new_line, 'style')
+ setValue(line_style, 'width', '100%')
+ setValue(line_style, 'height', font_size)
+ setValue(new_line, 'className', 'minivum-line')
+ setValue(line_style, 'whiteSpace', 'nowrap')
+ //setValue(line_style, 'overflow', 'hidden')
+ setValue(line_style, 'textOverflow', 'ellipsis')
+ if (arentSame(addAfter, undefined)) {
+  var editorContent = getValue(body_node, 'children')
+  var targetElement = getValue(editorContent, addNumbers(addAfter, nonline_elements))
+  targetElement.after(new_line)
+  return new_line
+ }
+ body_node.appendChild(new_line)
+ return new_line
+}
+
+function setCursor () {
+ setValue(cursor_style, 'top', addNumbers(multiplyNumbers(font_size, current_y), cursor_padding))
+ setValue(cursor_style, 'left', addNumbers(multiplyNumbers(character_width, current_x), cursor_padding))
+}
+
+function executeAction (keyEvent) {
+ var keyPressed = getValue(keyEvent, 'key')
+ if (areSame(keyPressed, 'Escape')) {
+  keyEvent.preventDefault()
+ }
+ if (areSame(keyPressed, ' ')) {
+  keyEvent.preventDefault()
+ }
+ if (areSame(keyPressed, "'")) {
+  keyEvent.preventDefault()
+ }
+ if (keyMuted(keyPressed)) {
+  return
+ }
+ if (areSame(command_mode, false)) {
+  if (areSame(keyPressed, 'Enter')) {
+   executeEnter()
+   return
+  }
+  if (areSame(keyPressed, 'Backspace')) {
+   executeBackspace()
+   return
+  }
+  if (areSame(keyPressed, '/')) {
+   keyEvent.preventDefault()
+  }
+  insertCharacter(keyPressed)
+  return
+ }
+ executeCommand(keyPressed)
+}
+
+function keyMuted (keyPressed) {
+ if (areSame(keyPressed, 'Meta')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Escape')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Alt')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Control')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Meta')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Shift')) {
+  return true
+ }
+ if (areSame(keyPressed, 'CapsLock')) {
+  return true
+ }
+ if (areSame(keyPressed, 'Tab')) {
+  return true
+ }
+ if (areSame(keyPressed, 'ArrowDown')) {
+  return true
+ }
+ if (areSame(keyPressed, 'ArrowUp')) {
+  return true
+ }
+ if (areSame(keyPressed, 'ArrowLeft')) {
+  return true
+ }
+ if (areSame(keyPressed, 'ArrowRight')) {
+  return true
+ }
+}
+
+function getLine (lineIndex) {
+ var editorContent = getValue(body_node, 'children')
+ var targetLine = getValue(editorContent, addNumbers(lineIndex, nonline_elements))
+ return targetLine
+}
+
+function executeEnter () {
+ var line1 = ''
+ var line2 = ''
+ var currentValue = getValue(current_line, 'textContent')
+ var currentSize = getValue(currentValue, 'length')
+ var searchIndex = 0
+ while (arentSame(current_x, searchIndex)) {
+  var currentCharacter = getValue(currentValue, searchIndex)
+  line1 = concatenateStrings(line1, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ while (firstGreater(currentSize, searchIndex)) {
+  var currentCharacter = getValue(currentValue, searchIndex)
+  line2 = concatenateStrings(line2, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ var newLine = addLine(current_y)
+ setValue(current_line, 'innerHTML', toHTML(line1))
+ setValue(newLine, 'innerHTML', toHTML(line2))
+ current_y = addNumbers(current_y, 1)
+ current_x = 0
+ setCursor()
+ current_line = newLine
+}
+
+function executeBackspace () {
+ if (areSame(current_x, 0)) {
+  if (areSame(current_y, 0)) {
+   return
+  }
+  var lineValue = getValue(current_line, 'textContent')
+  body_node.removeChild(current_line)
+  current_y = differenceNumbers(current_y, 1)
+  current_line = getLine(current_y)
+  var otherValue = getValue(current_line, 'textContent')
+  var newValue = concatenateStrings(otherValue, lineValue)
+  setValue(current_line, 'innerHTML', toHTML(newValue))
+  current_x = getValue(otherValue, 'length')
+  setCursor()
+  return
+ }
+ var lineValue = getValue(current_line, 'textContent')
+ var newValue = ''
+ var searchIndex = 0
+ var lineSize = getValue(lineValue, 'length')
+ var previousX = differenceNumbers(current_x, 1)
+ while (firstGreater(lineSize, searchIndex)) {
+  var currentCharacter = getValue(lineValue, searchIndex)
+  if (arentSame(searchIndex, previousX)) {
+   newValue = concatenateStrings(newValue, currentCharacter)
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ setValue(current_line, 'innerHTML', toHTML(newValue))
+ current_x = differenceNumbers(current_x, 1)
+ setCursor()
+}
+
+function toHTML (stringValue, currentIndex, currentOutput) {
+ var stringSize = getValue(stringValue, 'length')
+ var searchIndex = 0
+ var newValue = ''
+ if (arentSame(currentIndex, undefined)) {
+  searchIndex = currentIndex
+  newValue = currentOutput
+ }
+ while (firstGreater(stringSize, searchIndex)) {
+  var currentCharacter = getValue(stringValue, searchIndex)
+  if (areSame(currentCharacter, ' ')) {
+   newValue =  concatenateStrings(newValue, space_code)
+   return toHTML(stringValue, addNumbers(searchIndex, 1), newValue)
+  }
+  if (areSame(currentCharacter, '<')) {
+   newValue =  concatenateStrings(newValue, left_bracket)
+   return toHTML(stringValue, addNumbers(searchIndex, 1), newValue)
+  }
+  if (areSame(currentCharacter, '>')) {
+   newValue =  concatenateStrings(newValue, right_bracket)
+   return toHTML(stringValue, addNumbers(searchIndex, 1), newValue)
+  }
+  if (areSame(currentCharacter, '&')) {
+   newValue =  concatenateStrings(newValue, and_symbol)
+   return toHTML(stringValue, addNumbers(searchIndex, 1), newValue)
+  }
+  newValue =  concatenateStrings(newValue, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ return newValue
+}
+
+function getContent () {
+ var searchIndex = nonline_elements
+ var editorContent = getValue(body_node, 'children')
+ var editorSize = getValue(editorContent, 'length')
+ var outputString = ''
+ while (firstGreater(editorSize, searchIndex)) {
+  var currentLine = getValue(editorContent, searchIndex)
+  var lineContent = getValue(currentLine, 'textContent')
+  if (arentSame(lineContent, 'undefined')) {
+   outputString = concatenateStrings(outputString, lineContent)
+   outputString = concatenateStrings(outputString, "\n")
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ return outputString
+}
+
+function clearContent () {
+ var editorContent = getValue(body_node, 'children')
+ var currentLine = getValue(editorContent, nonline_elements)
+ while (arentSame(currentLine, undefined)) {
+  body_node.removeChild(currentLine)
+  currentLine = getValue(editorContent, nonline_elements)
+ }
+}
+
+function setContent (textContent, currentIndex) {
+ var newLine = ''
+ var searchIndex = 0
+ if (arentSame(currentIndex, undefined)) {
+  searchIndex = currentIndex
+ }
+ var contentSize = getValue(textContent, 'length')
+ while (firstGreater(contentSize, searchIndex)) {
+  var currentCharacter = getValue(textContent, searchIndex)
+  if (areSame(currentCharacter, '\n')) {
+   var nextIndex = addNumbers(searchIndex, 1)
+   var nextCharacter = getValue(textContent, nextIndex)
+   if (arentSame(nextCharacter, "'")) {
+    if (arentSame(nextCharacter, '"')) {
+     var createdLine = addLine()
+     setValue(createdLine, 'innerHTML', toHTML(newLine))
+     setContent(textContent, nextIndex)
+     return
+    }
+   }
+  }
+  newLine = concatenateStrings(newLine, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ var lineSize = getValue(newLine, 'length')
+ if (firstGreater(lineSize, 0)) {
+  var createdLine = addLine()
+  setValue(createdLine, 'innerHTML', toHTML(newLine))
+ }
+ var editorContent = getValue(body_node, 'children')
+ var lastIndex = differenceNumbers(getValue(editorContent, 'length'), addNumbers(nonline_elements, 1))
+ current_x = 0
+ current_y = lastIndex
+ setCursor()
+ updateScroll()
+ current_line = getValue(editorContent, lastIndex)
+}
+
+function getSize () {
+ var editorContent = getValue(body_node, 'children')
+ var editorSize = getValue(editorContent, 'length')
+ var numberLines = differenceNumbers(editorSize, nonline_elements)
+ return numberLines
+}
+
+function insertCharacter (keyPressed) {
+ var lineValue = getValue(current_line, 'textContent')
+ var lineSize = getValue(lineValue, 'length')
+ if (areSame(lineSize, current_x)) {
+  var newValue = concatenateStrings(lineValue, keyPressed)
+  setValue(current_line, 'innerHTML', toHTML(newValue))
+  current_x = addNumbers(current_x, 1)
+  setCursor()
+  return
+ }
+ var newValue = ''
+ var searchIndex = 0
+ while (firstGreater(lineSize, searchIndex)) {
+  var currentCharacter  = getValue(lineValue, searchIndex)
+  if (areSame(searchIndex, current_x)) {
+   var newValue = concatenateStrings(newValue, keyPressed)
+   while (firstGreater(lineSize, searchIndex)) {
+    currentCharacter  = getValue(lineValue, searchIndex)
+    newValue  = concatenateStrings(newValue, currentCharacter)
+    searchIndex = addNumbers(searchIndex, 1)
+   }
+   setValue(current_line, 'innerHTML', toHTML(newValue))
+   current_x = addNumbers(current_x, 1)
+   setCursor()
+   return
+  }
+  newValue  = concatenateStrings(newValue, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+}
+
+function countNonline () {
+ var editorContent = getValue(body_node, 'children')
+ var searchIndex = 0
+ var contentSize = getValue(editorContent, 'length')
+ while (firstGreater(contentSize, searchIndex)) {
+  var currentElement = getValue(editorContent, searchIndex)
+  var elementClassname = getValue(currentElement, 'className')
+  if (areSame(elementClassname, 'minivum-line')) {
+   return searchIndex   
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ return searchIndex
+}
+
+function executeCommand (keyPressed) {
+ if (areSame(keyPressed, 'i')) {
+  command_mode = false
+  return
+ }
+ if (areSame(keyPressed, ';')) {
+  var newProgram = getContent()
+  var oldProgram = getElement(interior_program)
+  if (arentSame(oldProgram, undefined)) {
+   body_node.removeChild(oldProgram)
+  }
+  nonline_elements = countNonline()
+  programElement = document.createElement('script')
+  if (ispDetected(newProgram)) {
+   newProgram = transpileIsp(newProgram)
+   console.log('isp newProgram: ', newProgram)
+  }
+  programElement.text = newProgram
+  programElement.id = interior_program
+  firstElement = getValue(getValue(body_node, 'children'), 0)
+  firstElement.after(programElement)
+  return
+ }
+ if (areSame(keyPressed, 'j')) {
+  if (areSame(current_y, 0)) {
+   return
+  }
+  var previousY = differenceNumbers(current_y, 1)
+  var previousLine = getLine(previousY)
+  current_line = previousLine
+  current_y = previousY
+  current_x = 0
+  setCursor()
+  return
+ }
+ if (areSame(keyPressed, 'k')) {
+  var numberLines = getSize()
+  var lastIndex = differenceNumbers(numberLines, 1)
+  if (areSame(lastIndex, current_y)) {
+   return
+  }
+  var nextY = addNumbers(current_y, 1)
+  var nextLine = getLine(nextY)
+  current_line = nextLine
+  current_y = nextY
+  current_x = 0
+  setCursor()
+  return
+ }
+ if (areSame(keyPressed, 'h')) {
+  if (areSame(current_x, 0)) {
+   return
+  }
+  current_x = differenceNumbers(current_x, 1)
+  setCursor()  
+  return
+ }
+ if (areSame(keyPressed, 'l')) {
+  var currentSize = getValue(getValue(current_line, 'textContent'), 'length')
+  if (areSame(current_x, currentSize)) {
+   return
+  }
+  current_x = addNumbers(current_x, 1)
+  setCursor()  
+  return
+ }
+ if (areSame(keyPressed, 'g')) {
+  current_line = getLine(0)
+  current_x = 0
+  current_y = 0
+  setCursor()
+  updateScroll()
+  return
+ }
+ if (areSame(keyPressed, 't')) {
+  var editorSize = getSize()
+  var lastIndex = differenceNumbers(editorSize, 1)
+  current_line = getLine(lastIndex)
+  current_x = 0
+  current_y = lastIndex
+  setCursor()
+  updateScroll()
+  return
+ }
+ if (areSame(keyPressed, 's')) {
+  var textContent = getContent()
+  localStorage.setItem(storage_name, textContent) 
+  return
+ }
+ if (areSame(keyPressed, 'z')) {
+  var storedProgram = localStorage.getItem(storage_name)
+  clearContent()
+  setContent(storedProgram)
+  current_x = 0
+  current_y = 0
+  current_line = getLine(0)
+  setCursor()
+  updateScroll()
+  return
+ }
+}
+
+function ispDetected (programText) {
+ var searchIndex = 0
+ var searchMaximum = 1000
+ var startingColons = 0
+ var numberSought = 2
+ var firstCharacter = getValue(programText, 0)
+ if (areSame(firstCharacter, ':')) {
+  startingColons = 1
+ }
+ while (firstGreater(searchMaximum, searchIndex)) {
+  var currentCharacter = getValue(programText, searchIndex)
+  if (areSame(currentCharacter, '\n')) {
+   var nextIndex = addNumbers(searchIndex, 1)
+   var nextCharacter = getValue(programText, nextIndex)
+   if (areSame(nextCharacter, ':')) {
+    startingColons = addNumbers(startingColons, 1)
+    if (areSame(startingColons, numberSought)) {
+     return true
+    }
+   }
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ return false
+}
+
+function getElement (elementID) {
+ var editorElements = getValue(body_node, 'children')
+ var searchIndex = 0
+ while (firstGreater(nonline_elements, searchIndex)) {
+  var currentElement = getValue(editorElements, searchIndex)
+  var currentID = getValue(currentElement, 'id')
+  if (areSame(elementID, currentID)) {
+   return currentElement
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+}
+
+function updateScroll () {
+  var newScroll = differenceNumbers(multiplyNumbers(current_y, font_size), breathing_room)
+  window.scrollTo(0, newScroll)
+}
+
+function secondaryAction (keyEvent) {
+ var keyPressed = keyEvent.key
+ keyEvent.preventDefault()
+ if (areSame(keyPressed, 'Escape')) {
+  command_mode = true
+  return
+ }
+}
+ 
+
+function arentSame (item1, item2) {
+ var conditionMet = item1 !== item2
+ return conditionMet
+}
+
+function differenceNumbers (number1, number2) {
+  var outputValue = number1 - number2
+  return outputValue
+}
+
+function firstGreater (number1, number2) {
+ var outputValue = number1 > number2
+ return outputValue
+}
+
+function addNumbers (number1, number2) {
+ var sumValue = number1 + number2
+ return sumValue
+}
+
+function multiplyNumbers (number1, number2) {
+ var productValue = number1 * number2
+ return productValue
+}
+
+function areSame (item1, item2) {
+ var conditionMet = item1 === item2
+ return conditionMet
+}
+
+function getValue (objectItem, valueKey) {
+ var valueValue = objectItem[valueKey]
+ return valueValue
+}
+
+function setValue (objectItem, valueKey, valueValue) {
+ objectItem[valueKey] = valueValue
+}
+
+function concatenateStrings (string1, string2) {
+ var concatenatedString = string1 + string2
+ return concatenatedString
+}
+
+function toString (numberItem) {
+ var asString = numberItem.toString()
+ return asString
+}
+
+function isOdd (inputNumber) {
+ var conditionMet = inputNumber % 2
+ return conditionMet
+}
 
 </script></body></html>
