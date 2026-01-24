@@ -14,7 +14,7 @@ space_code = '&nbsp;'
 left_bracket = '&lt;'
 right_bracket = '&gt;'
 and_symbol = '&amp;'
-cursor_padding = 7.5
+cursor_padding = 7
 interior_program = 'programojhaugen'
 nonline_elements = 3
 header_height = 20
@@ -42,6 +42,13 @@ setValue(cursor_style, 'position', 'absolute')
 current_x = 0
 current_y = 0
 
+header_1 = "Click <a id='click_1' style='text-decoration: underline; cursor: pointer;'>here</a> to save to your desktop"
+header_2 = " and click <a id='click_2' style='text-decoration: underline; cursor: pointer;'>here</a> for this primeval-Vim text-editor's commands "
+header_3 = "(or view their code at my GitHub). "
+header_4 = '<a target="_blank" href="https://github.com/ojhaugen15">Conceived, designed, & coded by OJ Haugen</a>'
+
+command_descriptions = "i: character insertion mode\nEscape: restore command mode\nh: left\nl: right\nj: up\nk: down\ng: top\nt: bottom\ns: save\nz: restore"
+
 setCursor()
 current_line = addLine()
 body_node.addEventListener('keydown', executeAction)
@@ -58,12 +65,19 @@ function createHeader () {
  setValue(headerStyle, 'fontSize', '10px')
  setValue(headerStyle, 'padding', '5px')
  setValue(headerStyle, 'marginBottom', concatenateStrings(header_margin, 'px'))
- headerElement.innerHTML = "Click <a style='text-decoration: underline; cursor: pointer;'>here</a> to save to your desktop and click <a style='text-decoration: underline; cursor: pointer;'>here</a> for this primeval-Vim text editor's commands"
+ headerElement.innerHTML = concatenateStrings(concatenateStrings(header_1, header_2), concatenateStrings(header_3, header_4))
  headerElement.addEventListener('click', function (clickEvent) {
   var targetElement = getValue(clickEvent, 'target')
   var targetType =  getValue(targetElement, 'tagName')
   if (areSame(targetType, 'A')) {
-   alert()
+   var targetID = getValue(targetElement, 'id')
+   if (areSame(targetID, 'click_1')) {
+
+    return
+   }
+   if (areSame(targetID, 'click_2')) {
+    setContent(command_descriptions, 0)
+   }
   }
  })
 }
@@ -287,12 +301,8 @@ function clearContent () {
  }
 }
 
-function setContent (textContent, currentIndex) {
+function setContent (textContent, searchIndex) {
  var newLine = ''
- var searchIndex = 0
- if (arentSame(currentIndex, undefined)) {
-  searchIndex = currentIndex
- }
  var contentSize = getValue(textContent, 'length')
  while (firstGreater(contentSize, searchIndex)) {
   var currentCharacter = getValue(textContent, searchIndex)
@@ -470,7 +480,7 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, 'z')) {
   var storedProgram = localStorage.getItem(storage_name)
   clearContent()
-  setContent(storedProgram)
+  setContent(storedProgram, 0)
   current_x = 0
   current_y = 0
   current_line = getLine(0)
