@@ -1,24 +1,27 @@
 <html><head></head><body><script>
 //veditor
  
-character_width = 7.8
-font_size = 13
+character_width = 12.1
+font_size = 20
 font_color = 'white'
 font_style = 'Courier'
 editor_background = 'black'
 body_padding = 10
 breathing_room = 10
-storage_name = 'minivumojhaugen'
-cursor_opacity = '0.8'
+storage_name = 'veditorojhaugen'
+cursor_opacity = '0.7'
 space_code = '&nbsp;'
 left_bracket = '&lt;'
 right_bracket = '&gt;'
 and_symbol = '&amp;'
-cursor_padding = 8
+cursor_padding = 7.5
 interior_program = 'programojhaugen'
+nonline_elements = 3
+header_height = 20
+header_margin = 10
+header_displacement = addNumbers(header_height, header_margin)
 
 command_mode = true
-nonline_elements = 2
 
 body_node = getValue(document, 'body')
 body_style = getValue(body_node, 'style')
@@ -33,16 +36,37 @@ cursor_style = getValue(cursor_element, 'style')
 body_node.appendChild(cursor_element)
 setValue(cursor_style, 'height', font_size)
 setValue(cursor_style, 'width', character_width)
-setValue(cursor_style, 'background', font_color)
+setValue(cursor_style, 'background', 'purple')
 setValue(cursor_style, 'opacity', cursor_opacity)
 setValue(cursor_style, 'position', 'absolute')
 current_x = 0
 current_y = 0
-setCursor()
 
+setCursor()
 current_line = addLine()
 body_node.addEventListener('keydown', executeAction)
 body_node.addEventListener('keyup', secondaryAction)
+createHeader()
+
+function createHeader () {
+ var headerElement = document.createElement('div')
+ body_node.prepend(headerElement)
+ var headerStyle = getValue(headerElement, 'style')
+ setValue(headerStyle, 'background', 'lightgray')
+ setValue(headerStyle, 'color', 'purple')
+ setValue(headerStyle, 'width', '100%')
+ setValue(headerStyle, 'fontSize', '10px')
+ setValue(headerStyle, 'padding', '5px')
+ setValue(headerStyle, 'marginBottom', concatenateStrings(header_margin, 'px'))
+ headerElement.innerHTML = "Click <a style='text-decoration: underline; cursor: pointer;'>here</a> to save to your desktop and click <a style='text-decoration: underline; cursor: pointer;'>here</a> for this primeval-Vim text editor's commands"
+ headerElement.addEventListener('click', function (clickEvent) {
+  var targetElement = getValue(clickEvent, 'target')
+  var targetType =  getValue(targetElement, 'tagName')
+  if (areSame(targetType, 'A')) {
+   alert()
+  }
+ })
+}
 
 function addLine (addAfter) {
  new_line = document.createElement('div')
@@ -65,8 +89,9 @@ function addLine (addAfter) {
 }
 
 function setCursor () {
- setValue(cursor_style, 'top', addNumbers(multiplyNumbers(font_size, current_y), cursor_padding))
- setValue(cursor_style, 'left', addNumbers(multiplyNumbers(character_width, current_x), cursor_padding))
+ var topPadding = addNumbers(cursor_padding, header_displacement)
+ setValue(cursor_style, 'top', concatenateStrings(addNumbers(multiplyNumbers(font_size, current_y), topPadding), 'px'))
+ setValue(cursor_style, 'left', concatenateStrings(addNumbers(multiplyNumbers(character_width, current_x), cursor_padding), 'px'))
 }
 
 function executeAction (keyEvent) {
