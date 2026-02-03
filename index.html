@@ -20,6 +20,8 @@ nonline_elements = 3
 header_height = 20
 header_margin = 10
 header_displacement = addNumbers(header_height, header_margin)
+m_jump = 30
+n_jump = quotientNumbers(m_jump, 2)
 
 command_mode = true
 
@@ -47,7 +49,16 @@ header_2 = " and click <a id='click_2' style='text-decoration: underline; cursor
 header_3 = "(or view their code at my GitHub). "
 header_4 = '<a target="_blank" href="https://github.com/ojhaugen15">Conceived, designed, & coded by OJ Haugen</a>'
 
-command_descriptions = "i: character insertion mode\nEscape: restore command mode\nh: left\nl: right\nj: up\nk: down\ng: top\nt: bottom\ns: save to 'localStorage'\nz: restore from 'localStorage'"
+descriptions_1 = "i: character insertion mode"
+descriptions_2 = "Escape: restore command mode"
+descriptions_3 = "h: left"
+descriptions_4 = "l: right"
+descriptions_5 = "j: up"
+descriptions_6 = "k: down"
+descriptions_7 = "g: top"
+descriptions_8 = "t: bottom"
+descriptions_9 = "s: save to 'localStorage'"
+descriptions_10 = "z: restore from 'localStorage'"
 
 setCursor()
 current_line = addLine()
@@ -76,10 +87,23 @@ function createHeader () {
     return
    }
    if (areSame(targetID, 'click_2')) {
-    setContent(command_descriptions, 0)
+    setContent(concatenateDescriptions(), 0)
    }
   }
  })
+}
+
+function concatenateDescriptions () {
+ var currentLine = description_1
+ var outputString = ''
+ var nextNumber = 2
+ while (arentSame(currentLine, undefined)) {
+  outputString = concatenateStrings(outputString, currentLine)
+  outputString = concatenateStrings(outputString, '\\n')
+  curentLine = getValue(window, concatenateStrings('description_', toString(nextNumber)))
+  nextNumber = addNumbers(nextNumber, 1)
+ }
+ return outputString
 }
 
 function addLine (addAfter) {
@@ -285,7 +309,8 @@ function getContent () {
   var lineContent = getValue(currentLine, 'textContent')
   if (arentSame(lineContent, 'undefined')) {
    outputString = concatenateStrings(outputString, lineContent)
-   outputString = concatenateStrings(outputString, "\n")
+   outputString = concatenateStrings(outputString, "
+")
   }
   searchIndex = addNumbers(searchIndex, 1)
  }
@@ -306,7 +331,8 @@ function setContent (textContent, searchIndex) {
  var contentSize = getValue(textContent, 'length')
  while (firstGreater(contentSize, searchIndex)) {
   var currentCharacter = getValue(textContent, searchIndex)
-  if (areSame(currentCharacter, '\n')) {
+  if (areSame(currentCharacter, '
+')) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(textContent, nextIndex)
    if (arentSame(nextCharacter, "'")) {
@@ -488,6 +514,146 @@ function executeCommand (keyPressed) {
   updateScroll()
   return
  }
+ if (areSame(keyPressed, 'a')) {
+  var currentSize = getValue(getValue(current_line, 'textContent'), 'length')
+  current_y = currentSize
+  setCursor()
+  return
+ }
+ if (areSame(keyPressed, 'y')) {
+  current_y = 0
+  setCursor()
+  return
+ }
+ if (areSame(keyPressed, 'd')) {
+  currentContent = getValue(current_line, 'textContent')
+  var newContent = ''
+  var searchIndex = 0
+  var currentSize = getValue(currentContent, 'length')
+  while (firstGreater(currentSize, searchIndex)) {
+   var currentCharacter = getValue(currentContent, searchIndex)
+   if (arentSame(searchIndex, current_y)) {
+    newContent = concatenateStrings(newContent, currentCharacter)
+   }
+   searchIndex = addNumbers(searchIndex, 1)
+  }
+  setValue(current_line, 'textContent', newContent)
+  return
+ }
+ if (areSame(keyPressed, 'q')) {
+  var numberLines = editorSize()
+  if (firstGreater(numberLines, 1)) {
+   var lastIndex = differenceNumbers(numberLines, 1)
+   body_node.removeChild(current_line)
+   if (areSame(lastIndex, current_y)) {
+    current_x = differenceNumbers(current_x, 1)
+    current_line = getValue(body_node, current_x)    
+    current_y = 0
+    setCursor()
+    return
+   }   
+   current_line = getValue(body_node, current_x)    
+   current_y = 0
+   setCursor()
+   return
+  }
+  setValue(current_line, 'textContent', '')
+  cursor_x = 0
+  setCursor()  
+  return
+ }
+ if (areSame(keyPressed, 'm')) {
+  var newY = addNumbers(current_y, m_jump)
+  var newLine = getLine(newY)
+  if (newLine) {
+   current_line = newLine
+   current_x = 0
+   current_y = newY
+   setCursor()
+  }  
+  return
+ }
+ if (areSame(keyPressed, 'n')) {
+  var newY = addNumbers(current_y, n_jump)
+  var newLine = getLine(newY)
+  if (newLine) {
+   current_line = newLine
+   current_x = 0
+   current_y = newY
+   setCursor()   
+  }
+  return
+ }
+ if (areSame(keyPressed, 'o')) {
+  var newY = differenceNumbers(current_y, n_jump)
+  var newLine = getLine(newY)
+  if (newLine) {
+   current_line = newLine
+   current_x = 0
+   current_y = newY
+   setCursor()
+  }
+  return
+ }
+ if (areSame(keyPressed, 'w')) {
+  var currentContent = getValue(current_line, 'textContent')
+  var searchIndex = differenceNumbers(current_x, 1)
+  while (firstGreater(searchIndex, 0)) {
+   var currentCharacter = getValue(currentContent, searchIndex)
+   if (areSame(currentCharacter, ' ')) {
+    searchIndex = differenceNumbers(searchIndex, 1)
+    while (firstGreater(searchIndex, 0)) {
+     currentCharacter = getValue(currentContent, searchIndex)
+     if (arentSame(currentCharacter, ' ')) {
+      current_x = addNumbers(searchIndex, 1)
+      setCursor()
+      return
+     }
+     searchIndex = differenceNumbers(searchIndex, 1)
+    }
+    current_x = 0
+    setCursor()
+    return
+   }
+   searchIndex = differenceNumbers(searchIndex, 1)
+  }
+  current_x = 0
+  setCursor() 
+  return
+ }
+ if (areSame(keyPressed, 'e')) {
+  var currentContent = getValue(current_line, 'textContent')
+  var currentSize = getValue(currentContent, 'length')
+  var searchIndex = addNumbers(current_x, 1)
+  while (firstGreater(currentSize, searchIndex)) {
+   var currentCharacter = getValue(currentContent, searchIndex)
+   if (areSame(currentCharacter, ' ')) {
+    current_x = searchIndex
+    setCursor()
+    return
+   }
+   searchIndex = addNumbers(searchIndex, 1)
+  }
+  current_x = currentSize
+  setCursor() 
+  return
+ }
+ if (areSame(keyPressed, 'b')) {
+  var currentContent = getValue(current_line, 'textContent')
+  var searchIndex = differenceNumbers(current_x, 1)
+  while (firstGreater(searchIndex, 0)) {
+   var currentCharacter = getValue(currentContent, searchIndex)
+   if (areSame(currentCharacter, ' ')) {
+    current_x = addNumbers(current_x, 1)
+    setCursor()
+    return
+   }
+   searchIndex = differenceNumbers(searchIndex, 1)
+  }
+  current_x = 0
+  setCursor()
+  return
+ } 
 }
 
 function ispDetected (programText) {
@@ -501,7 +667,8 @@ function ispDetected (programText) {
  }
  while (firstGreater(searchMaximum, searchIndex)) {
   var currentCharacter = getValue(programText, searchIndex)
-  if (areSame(currentCharacter, '\n')) {
+  if (areSame(currentCharacter, '
+')) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(programText, nextIndex)
    if (areSame(nextCharacter, ':')) {
@@ -543,40 +710,37 @@ function secondaryAction (keyEvent) {
  }
 }
  
-
+//
 function arentSame (item1, item2) {
- var conditionMet = item1 !== item2
- return conditionMet
+ return item1 !== item2
 }
 
 function differenceNumbers (number1, number2) {
-  var outputValue = number1 - number2
-  return outputValue
+  return number1 - number2
 }
 
 function firstGreater (number1, number2) {
- var outputValue = number1 > number2
- return outputValue
+ return number1 > number2
 }
 
 function addNumbers (number1, number2) {
- var sumValue = number1 + number2
- return sumValue
+ return number1 + number2
 }
 
 function multiplyNumbers (number1, number2) {
- var productValue = number1 * number2
- return productValue
+ return number1 * number2
+}
+
+function quotientNumbers (number1, number2) {
+ return number1 / number2
 }
 
 function areSame (item1, item2) {
- var conditionMet = item1 === item2
- return conditionMet
+ return item1 === item2
 }
 
 function getValue (objectItem, valueKey) {
- var valueValue = objectItem[valueKey]
- return valueValue
+ return objectItem[valueKey]
 }
 
 function setValue (objectItem, valueKey, valueValue) {
@@ -584,18 +748,15 @@ function setValue (objectItem, valueKey, valueValue) {
 }
 
 function concatenateStrings (string1, string2) {
- var concatenatedString = string1 + string2
- return concatenatedString
+ return string1 + string2
 }
 
 function toString (numberItem) {
- var asString = numberItem.toString()
- return asString
+ return numberItem.toString()
 }
 
 function isOdd (inputNumber) {
- var conditionMet = inputNumber % 2
- return conditionMet
+ return inputNumber % 2
 }
 
 </script></body></html>
