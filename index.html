@@ -22,27 +22,28 @@ header_margin = 10
 header_displacement = addNumbers(header_height, header_margin)
 m_jump = 30
 n_jump = quotientNumbers(m_jump, 2)
-
-command_mode = true
-
 body_node = getValue(document, 'body')
 body_style = getValue(body_node, 'style')
+cursor_element = document.createElement('div')
+cursor_style = getValue(cursor_element, 'style')
+
+command_mode = true
+visual_mode = false
+current_x = 0
+current_y = 0
+
 setValue(body_style, 'background', editor_background)
 setValue(body_style, 'color', font_color)
 setValue(body_style, 'fontSize', font_size)
 setValue(body_style, 'fontFamily', font_style)
 setValue(body_style, 'fontWeight', 'bold')
-
-cursor_element = document.createElement('div')
-cursor_style = getValue(cursor_element, 'style')
 body_node.appendChild(cursor_element)
+
 setValue(cursor_style, 'height', font_size)
 setValue(cursor_style, 'width', character_width)
 setValue(cursor_style, 'background', 'purple')
 setValue(cursor_style, 'opacity', cursor_opacity)
 setValue(cursor_style, 'position', 'absolute')
-current_x = 0
-current_y = 0
 
 header_1 = "Click <a id='click_1' style='text-decoration: underline; cursor: pointer;'>here</a> to save to your desktop"
 header_2 = " and click <a id='click_2' style='text-decoration: underline; cursor: pointer;'>here</a> for this primeval-Vim text-editor's commands "
@@ -59,6 +60,24 @@ descriptions_7 = "g: top"
 descriptions_8 = "t: bottom"
 descriptions_9 = "s: save to 'localStorage'"
 descriptions_10 = "z: restore from 'localStorage'"
+descriptions_11 = ""
+descriptions_12 = "m: large scroll"
+descriptions_13 = "n: half scroll"
+descriptions_14 = "o: backward scroll"
+descriptions_15 = "d: cursor delete"
+descriptions_16 = "q: delete line"
+descriptions_17 = "w: end of previous 'word'"
+descriptions_18 = "e: end of 'word'"
+descriptions_19 = "b: beginning of 'word'"
+descriptions_20 = "p: paste"
+descriptions_21 = "v: copy mode"
+descriptions_22 = "c: copy"
+descriptions_23 = "x: cut"
+descriptions_24 = "f: go to function definition"
+descriptions_25 = "u: undo"
+descriptions_26 = "r: redo"
+descriptions_27 = "':': search mode"
+descriptions_28 = "';': run text as program"
 
 setCursor()
 current_line = addLine()
@@ -83,7 +102,6 @@ function createHeader () {
   if (areSame(targetType, 'A')) {
    var targetID = getValue(targetElement, 'id')
    if (areSame(targetID, 'click_1')) {
-
     return
    }
    if (areSame(targetID, 'click_2')) {
@@ -99,14 +117,15 @@ function concatenateDescriptions () {
  var nextNumber = 2
  while (arentSame(currentLine, undefined)) {
   outputString = concatenateStrings(outputString, currentLine)
-  outputString = concatenateStrings(outputString, '\\n')
+  outputString = concatenateStrings(outputString, '
+')
   curentLine = getValue(window, concatenateStrings('description_', toString(nextNumber)))
   nextNumber = addNumbers(nextNumber, 1)
  }
  return outputString
 }
 
-function addLine (addAfter) {
+function addLine (addAfter, addBefore) {
  new_line = document.createElement('div')
  setValue(new_line, 'textContent')
  line_style = getValue(new_line, 'style')
@@ -120,6 +139,10 @@ function addLine (addAfter) {
   var editorContent = getValue(body_node, 'children')
   var targetElement = getValue(editorContent, addNumbers(addAfter, nonline_elements))
   targetElement.after(new_line)
+  return new_line
+ }
+ if (arentSame(addBefore, undefined)) {
+  body_node.insertBefore(new_line, addBefore)
   return new_line
  }
  body_node.appendChild(new_line)
@@ -309,8 +332,7 @@ function getContent () {
   var lineContent = getValue(currentLine, 'textContent')
   if (arentSame(lineContent, 'undefined')) {
    outputString = concatenateStrings(outputString, lineContent)
-   outputString = concatenateStrings(outputString, "
-")
+   outputString = concatenateStrings(outputString, " ")
   }
   searchIndex = addNumbers(searchIndex, 1)
  }
@@ -331,8 +353,7 @@ function setContent (textContent, searchIndex) {
  var contentSize = getValue(textContent, 'length')
  while (firstGreater(contentSize, searchIndex)) {
   var currentCharacter = getValue(textContent, searchIndex)
-  if (areSame(currentCharacter, '
-')) {
+  if (areSame(currentCharacter, ' ')) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(textContent, nextIndex)
    if (arentSame(nextCharacter, "'")) {
@@ -360,14 +381,12 @@ function setContent (textContent, searchIndex) {
  updateScroll()
  current_line = getValue(editorContent, lastIndex)
 }
-
 function getSize () {
  var editorContent = getValue(body_node, 'children')
  var editorSize = getValue(editorContent, 'length')
  var numberLines = differenceNumbers(editorSize, nonline_elements)
  return numberLines
 }
-
 function insertCharacter (keyPressed) {
  var lineValue = getValue(current_line, 'textContent')
  var lineSize = getValue(lineValue, 'length')
@@ -415,6 +434,49 @@ function countNonline () {
 }
 
 function executeCommand (keyPressed) {
+ if (areSame(visual_mode, true)) {
+  if (areSame(keyPressed, 'j')) {
+   if (arentSame(current_y, 0)) {
+    selection_start = differenceNumbers(selection_start, 1)
+    highlightLine(getLine(selection_start))
+   }  
+   return
+  }
+  if (areSame(keyPressed, 'k')) {
+   var lastIndex = differenceNumbers(getSize(), 1)
+   if (arentSame(lastIndex, selection_end)) {
+    selection_end = addNumbers(selection_end, 1)
+    highlightLine(getLine(selection_end))
+   }
+   return
+  }
+  if (areSame(keyPressed, 'c')) {
+   var editorElements = getValue(body_node, 'children')
+   var searchIndex = addNumbers(nonline_elements, selection_start)
+   copied_text = ''
+   var searchEnd = addNumbers(nonline_elements, addNumbers(selection_end, 1))
+   while (firstGreater(searchEnd, searchIndex)) {
+    var currentLine = getValue(editorElements, searchIndex)
+    var currentContent = getValue(currentLine, 'textContent'    
+    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '
+')
+    searchIndex = addNumbers(searchIndex, 1)
+   }
+   return
+  }
+  if (areSame(keyPressed, 'x')) {
+   var editorElements = getValue(body_node, 'children')
+   var lineIndex = addNumbers(nonline_elements, search_start)
+   var searchIndex = 0
+   var searchEnd = addNumbers(1, differenceNumbers(selection_end, selection_start))
+   while (firstGreater(searchEnd, searchIndex)) {
+    body_node.removeChild(getValue(editorElements, lineIndex))
+    searchIndex = addNumbers(searchIndex, 1)
+   }
+   return
+  }
+  return
+ }
  if (areSame(keyPressed, 'i')) {
   command_mode = false
   return
@@ -653,7 +715,43 @@ function executeCommand (keyPressed) {
   current_x = 0
   setCursor()
   return
- } 
+ }
+ if (areSame(keyPressed, 'v')) {
+  var currentLine = getLine(current_y)
+  highlightLine(currentLine)
+  visual_mode = true
+  selection_start = current_y
+  selection_end = current_y
+  return
+ }
+ if (areSame(keyPressed, 'p')) {
+  var lineAfter = getLine(current_y)
+  var searchIndex = 0
+  var copiedSize = getValue(copied_text, 'length')
+  var currentText = ''
+  while (firstGreater(copiedSize, searchIndex)) {
+   var currentCharacter = getValue(copied_text, searchIndex)
+   if (areSame(currentCharacter, '\\n')) {
+    var newLine = addLine(false, lineAfter)
+    setValue(newLine, 'innerHTML', toHTML(currentText))
+    currentText = '' 
+    currentCharacter = ''
+   }
+   currentText = addNumbers(currentText, currentCharacter)
+   searchIndex = addNumbers(searchIndex, 1)
+  }
+  return
+ }
+}
+
+function highlightLine (currentLine) {
+ var currentStyle = getValue(currentLine, 'style')
+ setValue(currentStyle, 'background', 'blue')
+}
+
+function unhighlightLine (currentLine) {
+ var currentStyle = getValue(currentLine, 'style')
+ setValue(currentStyle, 'background', '')
 }
 
 function ispDetected (programText) {
@@ -667,8 +765,7 @@ function ispDetected (programText) {
  }
  while (firstGreater(searchMaximum, searchIndex)) {
   var currentCharacter = getValue(programText, searchIndex)
-  if (areSame(currentCharacter, '
-')) {
+  if (areSame(currentCharacter, ' ')) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(programText, nextIndex)
    if (areSame(nextCharacter, ':')) {
@@ -701,11 +798,26 @@ function updateScroll () {
   window.scrollTo(0, newScroll)
 }
 
+function unhighlightAll () {
+ var editorElements = getValue(body_node, 'children')
+ var searchEnd = addNumbers(nonline_elements, addNumbers(selection_end, 1))
+ var searchIndex = addNumbers(nonline_elements, selection_start)
+ while (firstGreater(searchEnd, searchIndex)) {
+  var currentLine = getValue(editorElements, searchIndex)
+  unhighlightLine(currentLine)
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+}
+
 function secondaryAction (keyEvent) {
- var keyPressed = keyEvent.key
+ var keyPressed = getValue(keyEvent, 'key')
  keyEvent.preventDefault()
  if (areSame(keyPressed, 'Escape')) {
   command_mode = true
+  if (areSame(visual_mode, true)) {
+   visual_mode = false
+   unhighlightAll()
+  }
   return
  }
 }
@@ -716,7 +828,7 @@ function arentSame (item1, item2) {
 }
 
 function differenceNumbers (number1, number2) {
-  return number1 - number2
+ return number1 - number2
 }
 
 function firstGreater (number1, number2) {
