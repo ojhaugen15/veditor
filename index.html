@@ -73,11 +73,13 @@ descriptions_20 = "p: paste"
 descriptions_21 = "v: copy mode"
 descriptions_22 = "c: copy"
 descriptions_23 = "x: cut"
+/*
 descriptions_24 = "f: go to function definition"
 descriptions_25 = "u: undo"
 descriptions_26 = "r: redo"
 descriptions_27 = "':': search mode"
 descriptions_28 = "';': run text as program"
+*/
 
 setCursor()
 current_line = addLine()
@@ -112,14 +114,13 @@ function createHeader () {
 }
 
 function concatenateDescriptions () {
- var currentLine = description_1
+ var currentLine = descriptions_1
  var outputString = ''
  var nextNumber = 2
  while (arentSame(currentLine, undefined)) {
   outputString = concatenateStrings(outputString, currentLine)
-  outputString = concatenateStrings(outputString, '
-')
-  curentLine = getValue(window, concatenateStrings('description_', toString(nextNumber)))
+  outputString = concatenateStrings(outputString, '')
+  curentLine = getValue(window, concatenateStrings(concatenateStrings('descriptions_', toString(nextNumber)), '\n'))
   nextNumber = addNumbers(nextNumber, 1)
  }
  return outputString
@@ -457,9 +458,8 @@ function executeCommand (keyPressed) {
    var searchEnd = addNumbers(nonline_elements, addNumbers(selection_end, 1))
    while (firstGreater(searchEnd, searchIndex)) {
     var currentLine = getValue(editorElements, searchIndex)
-    var currentContent = getValue(currentLine, 'textContent'    
-    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '
-')
+    var currentContent = getValue(currentLine, 'textContent') 
+    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '')
     searchIndex = addNumbers(searchIndex, 1)
    }
    return
