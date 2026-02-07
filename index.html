@@ -120,9 +120,10 @@ function concatenateDescriptions () {
  var outputString = ''
  var nextNumber = 2
  while (arentSame(currentLine, undefined)) {
+  console.log(currentLine)
   outputString = concatenateStrings(outputString, currentLine)
-  outputString = concatenateStrings(outputString, '')
-  currentLine = getValue(window, concatenateStrings(concatenateStrings('descriptions_', toString(nextNumber)), '\n'))
+  outputString = concatenateStrings(outputString, '\n')
+  currentLine = getValue(window, concatenateStrings('descriptions_', toString(nextNumber)))
   nextNumber = addNumbers(nextNumber, 1)
  }
  return outputString
@@ -628,24 +629,39 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'a')) {
-  var currentSize = getValue(getValue(current_line, 'textContent'), 'length')
-  current_x = currentSize
+  var lineContent = getValue(current_line, 'textContent')
+  var lineSize = getValue(lineContent, 'length')
+  current_x = lineSize
   setCursor()
   return
  }
  if (areSame(keyPressed, 'y')) {
+  var lineContent = getValue(current_line, 'textContent')
+  var lineSize = getValue(lineContent, 'length')
+  var searchIndex = 0
+  while (firstGreater(lineSize, searchIndex)) {
+   var currentCode = characterCode(getValue(lineContent, searchIndex))
+   if (arentSame(currentCode, 160)) {
+    if (arentSame(currentCode, 32)) {
+     current_x = searchIndex
+     setCursor()
+     return
+    }
+   }
+   searchIndex = addNumbers(searchIndex, 1)
+  }
   current_x = 0
   setCursor()
   return
  }
  if (areSame(keyPressed, 'd')) {
-  currentContent = getValue(current_line, 'textContent')
+  var currentContent = getValue(current_line, 'textContent')
   var newContent = ''
   var searchIndex = 0
   var currentSize = getValue(currentContent, 'length')
   while (firstGreater(currentSize, searchIndex)) {
    var currentCharacter = getValue(currentContent, searchIndex)
-   if (arentSame(searchIndex, current_y)) {
+   if (arentSame(searchIndex, current_x)) {
     newContent = concatenateStrings(newContent, currentCharacter)
    }
    searchIndex = addNumbers(searchIndex, 1)
@@ -655,19 +671,19 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'q')) {
-  var numberLines = editorSize()
+  var numberLines = getSize()
   if (firstGreater(numberLines, 1)) {
    var lastIndex = differenceNumbers(numberLines, 1)
    body_node.removeChild(current_line)
    if (areSame(lastIndex, current_y)) {
-    current_x = differenceNumbers(current_x, 1)
-    current_line = getValue(body_node, current_x)    
-    current_y = 0
+    current_y = differenceNumbers(current_y, 1)
+    current_line = getLine(current_y)  
+    current_x = 0
     setCursor()
     return
    }   
-   current_line = getValue(body_node, current_x)    
-   current_y = 0
+   current_line = getLine(current_y)  
+   current_x = 0
    setCursor()
    return
   }
@@ -1045,6 +1061,10 @@ function toString (numberItem) {
 
 function isOdd (inputNumber) {
  return inputNumber % 2
+}
+
+function characterCode (inputString) {
+ return inputString.charCodeAt()
 }
 
 </script></body></html>
