@@ -876,19 +876,20 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, 'f')) {
   var searchIndex = current_x
   var currentLine = getLine(current_y)
-  var searchEnd = getValue(currentLine, 'length')
+  var currentText = getValue(currentLine, 'textContent')
+  var searchEnd = getValue(currentText, 'length')
   var functionName = ''
   while (firstGreater(searchEnd, searchIndex)) {
-   var currentCharacter = getValue(currentLine, searchIndex)
+   var currentCharacter = getValue(currentText, searchIndex)
    if (areSame(currentCharacter, '(')) {
     var previousIndex  = differenceNumbers(searchIndex, 1)
-    var previousCharacter = getValue(currentLine, previousIndex)
+    var previousCharacter = getValue(currentText, previousIndex)
     var previousCode = characterCode(previousCharacter)
     if (arentSame(previousCode, 160)) {
      if (arentSame(previousCode, 32)) {
       searchIndex = previousIndex
       while (arentSame(searchIndex, -1)) {
-       currentCharacter = getValue(currentLine, searchIndex)
+       currentCharacter = getValue(currentText, searchIndex)
        var currentCode = characterCode(currentCharacter)
        if (isSpace(currentCode)) {
         functionJump(functionName)
