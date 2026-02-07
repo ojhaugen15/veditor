@@ -791,7 +791,7 @@ function executeCommand (keyPressed) {
    var currentCharacter = getValue(currentContent, searchIndex)
    var currentCode = characterCode(currentCharacter)
    if (isSpace(currentCode)) {
-    current_x = addNumbers(current_x, 1)
+    current_x = addNumbers(searchIndex, 1)
     setCursor()
     return
    }
