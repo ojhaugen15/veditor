@@ -854,7 +854,7 @@ function functionJump (functionName) {
   var lineText = getValue(currentLine, 'textContent')
   var firstCharacter = getValue(lineText, 0)
   if (areSame(firstCharacter, 'f')) {
-   if (areSame(isDeclaration(currentLine)) {
+   if (areSame(isDeclaration(currentLine))) {
     var search2 = 9
     var lineSize = getValue(lineText, 'length')
     var declarationName = ''
