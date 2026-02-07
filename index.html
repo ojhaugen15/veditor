@@ -519,6 +519,7 @@ function executeCommand (keyPressed) {
    return
   }
   if (areSame(keyPressed, 'x')) {
+   previous_state = getContent()
    var editorElements = getValue(body_node, 'children')
    var lineIndex = addNumbers(nonline_elements, selection_start)
    var searchIndex = 0
@@ -531,13 +532,13 @@ function executeCommand (keyPressed) {
     body_node.removeChild(currentLine)
     searchIndex = addNumbers(searchIndex, 1)
    }
-   previous_state = getContent()
    return
   }
   return
  }
  if (areSame(keyPressed, 'i')) {
   command_mode = false
+  previous_state = getContent()
   return
  }
  if (areSame(keyPressed, ';')) {
@@ -625,6 +626,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'z')) {
+  previous_state = getContent()
   var storedProgram = localStorage.getItem(storage_name)
   clearContent()
   setContent(storedProgram, 0)
@@ -633,7 +635,6 @@ function executeCommand (keyPressed) {
   current_line = getLine(0)
   setCursor()
   updateScroll()
-  previous_state = storedProgram
   return
  }
  if (areSame(keyPressed, 'a')) {
@@ -663,6 +664,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'd')) {
+  previous_state = getContent()
   var currentContent = getValue(current_line, 'textContent')
   var newContent = ''
   var searchIndex = 0
@@ -675,10 +677,10 @@ function executeCommand (keyPressed) {
    searchIndex = addNumbers(searchIndex, 1)
   }
   setValue(current_line, 'textContent', newContent)
-  previous_state = getContent()
   return
  }
  if (areSame(keyPressed, 'q')) {
+  previous_state = getContent()
   var numberLines = getSize()
   if (firstGreater(numberLines, 1)) {
    var lastIndex = differenceNumbers(numberLines, 1)
@@ -698,7 +700,6 @@ function executeCommand (keyPressed) {
   setValue(current_line, 'textContent', '')
   cursor_x = 0
   setCursor()  
-  previous_state = getContent()
   return
  }
  if (areSame(keyPressed, 'm')) {
@@ -864,13 +865,28 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, 'u')) {
   state_undone = getContent()
   clearContent()
+  console.log(previous_state)
   setContent(previous_state, 0)
+  current_x = 0
+  var lastIndex = differenceNumbers(getSize(), 1)
+  if (firstGreater(current_y, lastIndex)) {
+   current_y = lastIndex
+   current_line = getLine(current_y)
+  }
+  setCursor()
   return
  }
  if (areSame(keyPressed, 'r')) {
   if (arentSame(state_undone, null)) {
    clearContent()
    setContent(state_undone, 0)
+   current_x = 0
+   var lastIndex = differenceNumbers(getSize(), 1)
+   if (firstGreater(current_y, lastIndex)) {
+    current_y = lastIndex
+    current_line = getLine(current_y)
+   }
+   setCursor()
    state_undone = null
   }
   return
@@ -1031,7 +1047,6 @@ function secondaryAction (keyEvent) {
  if (areSame(keyPressed, 'Escape')) {
   if (areSame(command_mode, false)) {
    command_mode = true
-   previous_state = getContent()
    return  
   }
   if (areSame(search_mode, true)) {
