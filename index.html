@@ -338,7 +338,7 @@ function getContent () {
   var lineContent = getValue(currentLine, 'textContent')
   if (arentSame(lineContent, 'undefined')) {
    outputString = concatenateStrings(outputString, lineContent)
-   outputString = concatenateStrings(outputString, " ")
+   outputString = concatenateStrings(outputString, "\n")
   }
   searchIndex = addNumbers(searchIndex, 1)
  }
