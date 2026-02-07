@@ -35,6 +35,9 @@ previous_state = ''
 state_undone = null
 search_term = ''
 search_mode = false
+selection_start = 0
+selection_start = 0
+copied_text = ''
 
 setValue(body_style, 'background', editor_background)
 setValue(body_style, 'color', font_color)
@@ -120,7 +123,6 @@ function concatenateDescriptions () {
  var outputString = ''
  var nextNumber = 2
  while (arentSame(currentLine, undefined)) {
-  console.log(currentLine)
   outputString = concatenateStrings(outputString, currentLine)
   outputString = concatenateStrings(outputString, '\n')
   currentLine = getValue(window, concatenateStrings('descriptions_', toString(nextNumber)))
@@ -139,7 +141,7 @@ function addLine (addAfter, addBefore) {
  setValue(line_style, 'whiteSpace', 'nowrap')
  //setValue(line_style, 'overflow', 'hidden')
  setValue(line_style, 'textOverflow', 'ellipsis')
- if (arentSame(addAfter, undefined)) {
+ if (arentSame(isFalsey(addAfter), true)) {
   var editorContent = getValue(body_node, 'children')
   var targetElement = getValue(editorContent, addNumbers(addAfter, nonline_elements))
   targetElement.after(new_line)
@@ -511,18 +513,22 @@ function executeCommand (keyPressed) {
    while (firstGreater(searchEnd, searchIndex)) {
     var currentLine = getValue(editorElements, searchIndex)
     var currentContent = getValue(currentLine, 'textContent') 
-    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '')
+    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '\n')
     searchIndex = addNumbers(searchIndex, 1)
    }
    return
   }
   if (areSame(keyPressed, 'x')) {
    var editorElements = getValue(body_node, 'children')
-   var lineIndex = addNumbers(nonline_elements, search_start)
+   var lineIndex = addNumbers(nonline_elements, selection_start)
    var searchIndex = 0
+   copied_text = ''
    var searchEnd = addNumbers(1, differenceNumbers(selection_end, selection_start))
    while (firstGreater(searchEnd, searchIndex)) {
-    body_node.removeChild(getValue(editorElements, lineIndex))
+    var currentLine = getValue(editorElements, lineIndex)
+    var currentContent = getValue(currentLine, 'textContent') 
+    copied_text = concatenateStrings(concatenateStrings(copied_text, currentContent), '\n')
+    body_node.removeChild(currentLine)
     searchIndex = addNumbers(searchIndex, 1)
    }
    previous_state = getContent()
@@ -736,14 +742,18 @@ function executeCommand (keyPressed) {
   var searchIndex = differenceNumbers(current_x, 1)
   while (firstGreater(searchIndex, 0)) {
    var currentCharacter = getValue(currentContent, searchIndex)
-   if (areSame(currentCharacter, ' ')) {
+   var currentCode = characterCode(currentCharacter)
+   if (isSpace(currentCode)) {
     searchIndex = differenceNumbers(searchIndex, 1)
     while (firstGreater(searchIndex, 0)) {
      currentCharacter = getValue(currentContent, searchIndex)
-     if (arentSame(currentCharacter, ' ')) {
-      current_x = addNumbers(searchIndex, 1)
-      setCursor()
-      return
+     currentCode = characterCode(currentCharacter)
+     if (arentSame(currentCode, 32)) {
+      if (arentSame(currentCode, 160)) {
+       current_x = addNumbers(searchIndex, 1)
+       setCursor()
+       return
+      }
      }
      searchIndex = differenceNumbers(searchIndex, 1)
     }
@@ -762,8 +772,8 @@ function executeCommand (keyPressed) {
   var currentSize = getValue(currentContent, 'length')
   var searchIndex = addNumbers(current_x, 1)
   while (firstGreater(currentSize, searchIndex)) {
-   var currentCharacter = getValue(currentContent, searchIndex)
-   if (areSame(currentCharacter, ' ')) {
+   var currentCode = characterCode(getValue(currentContent, searchIndex))
+   if (isSpace(currentCode)) {
     current_x = searchIndex
     setCursor()
     return
@@ -779,7 +789,8 @@ function executeCommand (keyPressed) {
   var searchIndex = differenceNumbers(current_x, 1)
   while (firstGreater(searchIndex, 0)) {
    var currentCharacter = getValue(currentContent, searchIndex)
-   if (areSame(currentCharacter, ' ')) {
+   var currentCode = characterCode(currentCharacter)
+   if (isSpace(currentCode)) {
     current_x = addNumbers(current_x, 1)
     setCursor()
     return
@@ -805,7 +816,7 @@ function executeCommand (keyPressed) {
   var currentText = ''
   while (firstGreater(copiedSize, searchIndex)) {
    var currentCharacter = getValue(copied_text, searchIndex)
-   if (areSame(currentCharacter, '\\n')) {
+   if (areSame(currentCharacter, '\n')) {
     var newLine = addLine(false, lineAfter)
     setValue(newLine, 'innerHTML', toHTML(currentText))
     currentText = '' 
@@ -827,19 +838,23 @@ function executeCommand (keyPressed) {
    if (areSame(currentCharacter, '(')) {
     var previousIndex  = differenceNumbers(searchIndex, 1)
     var previousCharacter = getValue(currentLine, previousIndex)
-    if (arentSame(previousCharacter, ' ')) {
-     searchIndex = previousIndex
-     while (arentSame(searchIndex, -1)) {
-      currentCharacter = getValue(currentLine, searchIndex)
-      if (areSame(currentCharacter, ' ')) {
-       functionJump(functionName)
-       return
+    var previousCode = characterCode(previousCharacter)
+    if (arentSame(previousCode, 160)) {
+     if (arentSame(previousCode, 32)) {
+      searchIndex = previousIndex
+      while (arentSame(searchIndex, -1)) {
+       currentCharacter = getValue(currentLine, searchIndex)
+       var currentCode = characterCode(currentCharacter)
+       if (isSpace(currentCode)) {
+        functionJump(functionName)
+        return
+       }
+       functionName = concatenateStrings(currentCharacter, functionName)
+       searchIndex = differenceNumbers(searchIndex, 1)
       }
-      functionName = concatenateStrings(currentCharacter, functionName)
-      searchIndex = differenceNumbers(searchIndex, 1)
+      functionJump(functionName)
+      return
      }
-     functionJump(functionName)
-     return
     }
    }
    searchIndex = addNumbers(searchIndex, 1)
@@ -863,6 +878,15 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, ':')) {
   search_mode = true
   return
+ }
+}
+
+function isSpace (inputNumber) {
+ if (areSame(inputNumber, 32)) {
+  return true
+ }
+ if (areSame(inputNumber, 160)) {
+  return true
  }
 }
 
@@ -923,8 +947,11 @@ function isDeclaration (lineText) {
  if (arentSame(getValue(lineText, 7), 'n')) {
   return false
  }
- if (arentSame(getValue(lineText, 8), ' ')) {
-  return false
+ var code8 = characterCode(getValue(lineText, 8))
+ if (arentSame(code8, 32)) {
+  if (arentSame(code8, 160)) {
+   return false
+  }
  }
  if (areSame(getValue(lineText, 9), '=')) {
   return false
@@ -953,7 +980,8 @@ function ispDetected (programText) {
  }
  while (firstGreater(searchMaximum, searchIndex)) {
   var currentCharacter = getValue(programText, searchIndex)
-  if (areSame(currentCharacter, ' ')) {
+  var currentCode = characterCode(currentCharacter)
+  if (isSpace(currentCode)) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(programText, nextIndex)
    if (areSame(nextCharacter, ':')) {
@@ -1070,6 +1098,10 @@ function isOdd (inputNumber) {
 
 function characterCode (inputString) {
  return inputString.charCodeAt()
+}
+
+function isFalsey (inputItem) {
+ return !inputItem
 }
 
 </script></body></html>
