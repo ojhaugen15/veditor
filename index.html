@@ -231,9 +231,11 @@ function keyMuted (keyPressed) {
 }
 
 function getLine (lineIndex) {
- var editorContent = getValue(body_node, 'children')
- var targetLine = getValue(editorContent, addNumbers(lineIndex, nonline_elements))
- return targetLine
+ if (firstGreater(lineIndex, -1)) {
+  var editorContent = getValue(body_node, 'children')
+  var targetLine = getValue(editorContent, addNumbers(lineIndex, nonline_elements))
+  return targetLine
+ }
 }
 
 function executeEnter () {
@@ -357,7 +359,7 @@ function setContent (textContent, searchIndex) {
  var contentSize = getValue(textContent, 'length')
  while (firstGreater(contentSize, searchIndex)) {
   var currentCharacter = getValue(textContent, searchIndex)
-  if (areSame(currentCharacter, ' ')) {
+  if (areSame(currentCharacter, '\n')) {
    var nextIndex = addNumbers(searchIndex, 1)
    var nextCharacter = getValue(textContent, nextIndex)
    if (arentSame(nextCharacter, "'")) {
@@ -701,6 +703,7 @@ function executeCommand (keyPressed) {
    current_x = 0
    current_y = newY
    setCursor()
+   updateScroll()
   }  
   return
  }
@@ -711,7 +714,8 @@ function executeCommand (keyPressed) {
    current_line = newLine
    current_x = 0
    current_y = newY
-   setCursor()   
+   setCursor()
+   updateScroll()
   }
   return
  }
@@ -723,6 +727,7 @@ function executeCommand (keyPressed) {
    current_x = 0
    current_y = newY
    setCursor()
+   updateScroll()
   }
   return
  }
