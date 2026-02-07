@@ -122,8 +122,7 @@ function concatenateDescriptions () {
  while (arentSame(currentLine, undefined)) {
   outputString = concatenateStrings(outputString, currentLine)
   outputString = concatenateStrings(outputString, '')
-  curentLine = getValue(window, concatenateStrings(concatenateStrings('descriptions_', toString(nextNumber)), '
-'))
+  currentLine = getValue(window, concatenateStrings(concatenateStrings('descriptions_', toString(nextNumber)), '\n'))
   nextNumber = addNumbers(nextNumber, 1)
  }
  return outputString
