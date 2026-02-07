@@ -1,4 +1,4 @@
-<html><head></head><body><script>
+<html><head></head><body><script id='veditorojhaugen'>
 //veditor
  
 character_width = 12.1
@@ -121,10 +121,9 @@ function createHeader () {
    var targetID = getValue(targetElement, 'id')
    if (areSame(targetID, 'click_1')) {
     var editorText = getContent()
-    var editorContent = getValue(body_node, 'children')
-    var veditorProgram = getValue(getValue(editorContent, 1), 'outerHTML')
-    var veditorTop = concatenateStrings(concatenateStrings('<html><head>', editorText), '</head><body>')
-    var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html>')
+    var veditorProgram = getValue(document.getElementById(storage_name), 'outerHTML')
+    var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor">', editorText), '</meta></head><body>')
+    var veditorHTLM = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')
     downloadFile(veditorHTML, 'index.html', 'html')
     return
    }
