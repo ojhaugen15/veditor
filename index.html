@@ -95,8 +95,8 @@ createHeader()
 setSaved()
 
 function setSaved () {
+ return
  var savedText = getValue(head_node, 'textContent')
- console.log(savedText)
  setContent(savedText, 0)
 }
 
@@ -388,20 +388,32 @@ function clearContent () {
  }
 }
 
+function notQuotation (inputCharacter) {
+ if (areSame(inputCharacter, '"')) {
+  return false
+ }
+ if (areSame(inputCharacter, "'")) {
+  return false
+ }
+}
+
 function setContent (textContent, searchIndex) {
  var newLine = ''
  var contentSize = getValue(textContent, 'length')
  while (firstGreater(contentSize, searchIndex)) {
   var currentCharacter = getValue(textContent, searchIndex)
   if (areSame(currentCharacter, '\n')) {
-   var nextIndex = addNumbers(searchIndex, 1)
-   var nextCharacter = getValue(textContent, nextIndex)
-   if (arentSame(nextCharacter, "'")) {
-    if (arentSame(nextCharacter, '"')) {
-     var createdLine = addLine()
-     setValue(createdLine, 'innerHTML', toHTML(newLine))
-     setContent(textContent, nextIndex)
+   var nextCharacter = getValue(textContent, addNumbers(searchIndex, 1))
+   if (notQuotation(nextCharacter)) {
+    var nextIndex = addNumbers(searchIndex, 1)
+    var nextCharacter = getValue(textContent, nextIndex)
+    if (arentSame(nextCharacter, "'")) {
+     if (arentSame(nextCharacter, '"')) {
+      var createdLine = addLine()
+      setValue(createdLine, 'innerHTML', toHTML(newLine))
+      setContent(textContent, nextIndex)
      return
+     }
     }
    }
   }
@@ -846,10 +858,13 @@ function executeCommand (keyPressed) {
   while (firstGreater(copiedSize, searchIndex)) {
    var currentCharacter = getValue(copied_text, searchIndex)
    if (areSame(currentCharacter, '\n')) {
-    var newLine = addLine(false, lineAfter)
-    setValue(newLine, 'innerHTML', toHTML(currentText))
-    currentText = '' 
-    currentCharacter = ''
+    var nextCharacter = getValue(copied_text, addNumbers(searchIndex, 1))
+    if (notQuotation(nextCharacter)) {
+     var newLine = addLine(false, lineAfter)
+     setValue(newLine, 'innerHTML', toHTML(currentText))
+     currentText = ''
+     currentCharacter = ''
+    }
    }
    currentText = addNumbers(currentText, currentCharacter)
    searchIndex = addNumbers(searchIndex, 1)
