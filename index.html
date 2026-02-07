@@ -9,6 +9,7 @@ editor_background = 'black'
 body_padding = 10
 breathing_room = 10
 storage_name = 'veditorojhaugen'
+app_name = 'veditor'
 cursor_opacity = '0.7'
 space_code = '&nbsp;'
 left_bracket = '&lt;'
@@ -23,7 +24,6 @@ header_displacement = addNumbers(header_height, header_margin)
 m_jump = 30
 n_jump = quotientNumbers(m_jump, 2)
 body_node = getValue(document, 'body')
-head_node = getValue(document, 'head')
 body_style = getValue(body_node, 'style')
 cursor_element = document.createElement('div')
 cursor_style = getValue(cursor_element, 'style')
@@ -92,12 +92,15 @@ current_line = addLine()
 body_node.addEventListener('keydown', executeAction)
 body_node.addEventListener('keyup', secondaryAction)
 createHeader()
-setSaved()
+setDownloaded()
 
-function setSaved () {
- return
- var savedText = getValue(head_node, 'textContent')
- setContent(savedText, 0)
+function setDownloaded () {
+ var downloadedStorage = document.getElementById(app_name)
+ if (downloadedStorage) {
+  nonline_elements = addNumbers(nonline_elements, 1)
+  var savedText = getValue(downloadedStorage, 'textContent')
+  setContent(savedText, 0)
+ }
 }
 
 function createHeader () {
