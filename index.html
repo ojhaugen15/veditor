@@ -23,6 +23,7 @@ header_displacement = addNumbers(header_height, header_margin)
 m_jump = 30
 n_jump = quotientNumbers(m_jump, 2)
 body_node = getValue(document, 'body')
+head_node = getValue(document, 'head')
 body_style = getValue(body_node, 'style')
 cursor_element = document.createElement('div')
 cursor_style = getValue(cursor_element, 'style')
@@ -52,7 +53,7 @@ setValue(cursor_style, 'background', 'purple')
 setValue(cursor_style, 'opacity', cursor_opacity)
 setValue(cursor_style, 'position', 'absolute')
 
-header_1 = "Click <a id='click_1' style='text-decoration: underline; cursor: pointer;'>here</a> to save to your desktop"
+header_1 = "Click <a id='click_1' style='text-decoration: underline; cursor: pointer;'>here</a> to download/save file"
 header_2 = " and click <a id='click_2' style='text-decoration: underline; cursor: pointer;'>here</a> for this primeval-Vim text-editor's commands "
 header_3 = "(or view their code at my GitHub). "
 header_4 = '<a target="_blank" href="https://github.com/ojhaugen15">Conceived, designed, & coded by OJ Haugen</a>'
@@ -70,7 +71,7 @@ descriptions_10 = "z: restore from 'localStorage'"
 descriptions_11 = ""
 descriptions_12 = "m: large scroll"
 descriptions_13 = "n: half scroll"
-descriptions_14 = "o: backward scroll"
+descriptions_14 = "o: backward large scroll"
 descriptions_15 = "d: cursor delete"
 descriptions_16 = "q: delete line"
 descriptions_17 = "w: end of previous 'word'"
@@ -91,6 +92,13 @@ current_line = addLine()
 body_node.addEventListener('keydown', executeAction)
 body_node.addEventListener('keyup', secondaryAction)
 createHeader()
+setSaved()
+
+function setSaved () {
+ var savedText = getValue(head_node, 'textContent')
+ console.log(savedText)
+ setContent(savedText, 0)
+}
 
 function createHeader () {
  var headerElement = document.createElement('div')
@@ -98,7 +106,7 @@ function createHeader () {
  var headerStyle = getValue(headerElement, 'style')
  setValue(headerStyle, 'background', 'lightgray')
  setValue(headerStyle, 'color', 'purple')
- setValue(headerStyle, 'width', '100%')
+ setValue(headerStyle, 'width', '1500px')
  setValue(headerStyle, 'fontSize', '10px')
  setValue(headerStyle, 'padding', '5px')
  setValue(headerStyle, 'marginBottom', concatenateStrings(header_margin, 'px'))
@@ -109,6 +117,12 @@ function createHeader () {
   if (areSame(targetType, 'A')) {
    var targetID = getValue(targetElement, 'id')
    if (areSame(targetID, 'click_1')) {
+    var editorText = getContent()
+    var editorContent = getValue(body_node, 'children')
+    var veditorProgram = getValue(getValue(editorContent, 1), 'outerHTML')
+    var veditorTop = concatenateStrings(concatenateStrings('<html><head>', editorText), '</head><body>')
+    var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html>')
+    downloadFile(veditorHTML, 'index.html', 'html')
     return
    }
    if (areSame(targetID, 'click_2')) {
@@ -116,6 +130,24 @@ function createHeader () {
    }
   }
  })
+}
+
+function downloadFile (fileData, fileName, fileType) {
+ var fileElement = new Blob([ fileData ], { type: fileType })
+ if (window.navigator.msSaveOrOpenBlob) { // IE10+
+  window.navigator.msSaveOrOpenBlob(file, filename)
+  return
+ }
+ var anchorElement = document.createElement("a")
+ var fileURL = URL.createObjectURL(fileElement)
+ setValue(anchorElement, 'href', fileURL)
+ setValue(anchorElement, 'download', fileName)
+ body_node.appendChild(anchorElement)
+ anchorElement.click()
+ setTimeout(function() {
+  body_node.removeChild(anchorElement)
+  window.URL.revokeObjectURL(fileURL)
+ }, 0)
 }
 
 function concatenateDescriptions () {
@@ -137,7 +169,7 @@ function addLine (addAfter, addBefore) {
  line_style = getValue(new_line, 'style')
  setValue(line_style, 'width', '100%')
  setValue(line_style, 'height', font_size)
- setValue(new_line, 'className', 'minivum-line')
+ setValue(new_line, 'className', 'veditor-line')
  setValue(line_style, 'whiteSpace', 'nowrap')
  //setValue(line_style, 'overflow', 'hidden')
  setValue(line_style, 'textOverflow', 'ellipsis')
@@ -428,7 +460,7 @@ function countNonline () {
  while (firstGreater(contentSize, searchIndex)) {
   var currentElement = getValue(editorContent, searchIndex)
   var elementClassname = getValue(currentElement, 'className')
-  if (areSame(elementClassname, 'minivum-line')) {
+  if (areSame(elementClassname, 'veditor-line')) {
    return searchIndex   
   }
   searchIndex = addNumbers(searchIndex, 1)
@@ -693,7 +725,7 @@ function executeCommand (keyPressed) {
    return
   }
   setValue(current_line, 'textContent', '')
-  cursor_x = 0
+  current_x = 0
   setCursor()  
   return
  }
