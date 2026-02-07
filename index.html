@@ -381,20 +381,15 @@ function setContent (textContent, searchIndex) {
   var createdLine = addLine()
   setValue(createdLine, 'innerHTML', toHTML(newLine))
  }
- var editorContent = getValue(body_node, 'children')
- var lastIndex = differenceNumbers(getValue(editorContent, 'length'), addNumbers(nonline_elements, 1))
- current_x = 0
- current_y = lastIndex
- setCursor()
- updateScroll()
- current_line = getValue(editorContent, lastIndex)
 }
+
 function getSize () {
  var editorContent = getValue(body_node, 'children')
  var editorSize = getValue(editorContent, 'length')
  var numberLines = differenceNumbers(editorSize, nonline_elements)
  return numberLines
 }
+
 function insertCharacter (keyPressed) {
  var lineValue = getValue(current_line, 'textContent')
  var lineSize = getValue(lineValue, 'length')
@@ -811,6 +806,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'p')) {
+  previous_state = getContent()
   var lineAfter = getLine(current_y)
   var searchIndex = 0
   var copiedSize = getValue(copied_text, 'length')
@@ -826,7 +822,6 @@ function executeCommand (keyPressed) {
    currentText = addNumbers(currentText, currentCharacter)
    searchIndex = addNumbers(searchIndex, 1)
   }
-  previous_state = getContent()
   return
  }
  if (areSame(keyPressed, 'f')) {
@@ -863,9 +858,11 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'u')) {
+  if (arentSame(state_undone, null)) {
+   return
+  }
   state_undone = getContent()
   clearContent()
-  console.log(previous_state)
   setContent(previous_state, 0)
   current_x = 0
   var lastIndex = differenceNumbers(getSize(), 1)
