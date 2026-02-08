@@ -124,7 +124,7 @@ function createHeader () {
     var editorText = getContent()
     var veditorProgram = getValue(document.getElementById(storage_name), 'outerHTML')
     var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor">', editorText), '</meta></head><body>')
-    var veditorHTLM = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')
+    var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')
     downloadFile(veditorHTML, 'index.html', 'html')
     return
    }
