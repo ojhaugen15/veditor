@@ -99,7 +99,7 @@ setDownloaded()
 function setDownloaded () {
  var downloadedStorage = document.getElementById(app_name)
  if (downloadedStorage) {
-  var savedText = getValue(downloadedStorage, 'textContent')
+  var savedText = getValue(downloadedStorage, 'content')
   setContent(savedText, 0)
  }
 }
@@ -123,7 +123,7 @@ function createHeader () {
    if (areSame(targetID, 'click_1')) {
     var editorText = getContent()
     var veditorProgram = getValue(document.getElementById(storage_name), 'outerHTML')
-    var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor">', editorText), '</meta></head><body>')
+    var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor" content="', editorText), '"></head><body>')
     var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')
     downloadFile(veditorHTML, 'index.html', 'html')
     return
