@@ -100,6 +100,7 @@ function setDownloaded () {
  var downloadedStorage = document.getElementById(app_name)
  if (downloadedStorage) {
   var savedText = getValue(downloadedStorage, 'content')
+  clearContent()
   setContent(savedText, 0)
  }
 }
