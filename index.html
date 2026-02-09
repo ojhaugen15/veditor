@@ -593,9 +593,9 @@ function executeCommand (keyPressed) {
   }
   nonline_elements = countNonline()
   programElement = document.createElement('script')
-  if (ispDetected(newProgram)) {
-   newProgram = transpileIsp(newProgram)
-   console.log('isp newProgram: ', newProgram)
+//  if (ispDetected(newProgram)) {
+  // newProgram = transpileIsp(newProgram)
+//   console.log('isp newProgram: ', newProgram)
   }
   programElement.text = newProgram
   programElement.id = interior_program
