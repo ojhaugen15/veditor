@@ -58,6 +58,7 @@ header_2 = " and click <a id='click_2' style='text-decoration: underline; cursor
 header_3 = "(or view their code at my GitHub). "
 header_4 = '<a target="_blank" href="https://github.com/ojhaugen15">Conceived, designed, coded, & maintained by OJ Haugen</a>'
 
+descriptions_0 = ""
 descriptions_1 = "i - character insertion mode"
 descriptions_2 = "Escape - restore command mode"
 descriptions_3 = "h - left"
@@ -155,9 +156,9 @@ function downloadFile (fileData, fileName, fileType) {
 }
 
 function concatenateDescriptions () {
- var currentLine = descriptions_1
+ var currentLine = descriptions_0
  var outputString = ''
- var nextNumber = 2
+ var nextNumber = 1
  while (arentSame(currentLine, undefined)) {
   outputString = concatenateStrings(outputString, currentLine)
   outputString = concatenateStrings(outputString, '\n')
