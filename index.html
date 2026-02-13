@@ -874,8 +874,7 @@ function executeCommand (keyPressed) {
  }
  if (areSame(keyPressed, 'f')) {
   var searchIndex = current_x
-  var currentLine = getLine(current_y)
-  var currentText = getValue(currentLine, 'textContent')
+  var currentText = getValue(current_line, 'textContent')
   var searchEnd = getValue(currentText, 'length')
   var functionName = ''
   while (firstGreater(searchEnd, searchIndex)) {
@@ -884,23 +883,21 @@ function executeCommand (keyPressed) {
     var previousIndex  = differenceNumbers(searchIndex, 1)
     var previousCharacter = getValue(currentText, previousIndex)
     var previousCode = characterCode(previousCharacter)
-    if (arentSame(previousCode, 160)) {
-     if (arentSame(previousCode, 32)) {
-      searchIndex = previousIndex
-      while (arentSame(searchIndex, -1)) {
-       currentCharacter = getValue(currentText, searchIndex)
-       var currentCode = characterCode(currentCharacter)
-       if (isSpace(currentCode)) {
-        functionJump(functionName)
-        return
-       }
-       functionName = concatenateStrings(currentCharacter, functionName)
-       searchIndex = differenceNumbers(searchIndex, 1)
+    if (arentSame(true, isSpace(previousCode))) {
+     searchIndex = previousIndex
+     while (arentSame(searchIndex, -1)) {
+      currentCharacter = getValue(currentText, searchIndex)
+      var currentCode = characterCode(currentCharacter)
+      if (isSpace(currentCode)) {
+       functionJump(functionName)
+       return
       }
-      functionJump(functionName)
-      return
+      functionName = concatenateStrings(currentCharacter, functionName)
+      searchIndex = differenceNumbers(searchIndex, 1)
      }
+     functionJump(functionName)
     }
+    return
    }
    searchIndex = addNumbers(searchIndex, 1)
   }        
