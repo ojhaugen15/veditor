@@ -669,13 +669,15 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, 'z')) {
   previous_state = getContent()
   var storedProgram = localStorage.getItem(storage_name)
-  clearContent()
-  setContent(storedProgram, 0)
-  current_x = 0
-  current_y = 0
-  current_line = getLine(0)
-  setCursor()
-  updateScroll()
+  if (storedProgram) {
+   clearContent()
+   setContent(storedProgram, 0)
+   current_x = 0
+   current_y = 0
+   current_line = getLine(0)
+   setCursor()
+   updateScroll()
+  }
   return
  }
  if (areSame(keyPressed, 'a')) {
