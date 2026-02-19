@@ -222,7 +222,7 @@ function downloadFile (fileData, fileName, fileType) {
  setValue(anchorElement, 'href', fileURL)
  setValue(anchorElement, 'download', fileName)
  nonline_elements = addNumbers(nonline_elements, 1)
- body_node.prependChild(anchorElement)
+ body_node.prepend(anchorElement)
  anchorElement.click()
  setTimeout(function() {
   body_node.removeChild(anchorElement)
@@ -957,6 +957,7 @@ function executeCommand (keyPressed) {
        return
       }
       functionName = concatenateStrings(currentCharacter, functionName)
+      console.log(function
       searchIndex = differenceNumbers(searchIndex, 1)
      }
      functionJump(functionName)
