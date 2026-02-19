@@ -1,4 +1,4 @@
-<html><head></head><body><script id='veditorojhaugen'>
+<html><head></head><body><script id='veditor_program'>
 //veditor
  
 character_width = 12.1
@@ -8,7 +8,7 @@ font_style = 'Courier'
 editor_background = 'black'
 body_padding = 10
 breathing_room = 10
-storage_name = 'veditorcontent'
+storage_name = 'veditor-content'
 app_name = 'veditor'
 cursor_opacity = '0.7'
 space_code = '&nbsp;'
@@ -28,6 +28,7 @@ body_style = getValue(body_node, 'style')
 cursor_element = document.createElement('div')
 cursor_style = getValue(cursor_element, 'style')
 
+paster_element = null
 command_mode = true
 visual_mode = false
 current_x = 0
@@ -95,6 +96,7 @@ current_line = addLine()
 body_node.addEventListener('keydown', executeAction)
 body_node.addEventListener('keyup', secondaryAction)
 createHeader()
+createFooter()
 setDownloaded()
 
 function setDownloaded () {
@@ -104,6 +106,66 @@ function setDownloaded () {
   clearContent()
   setContent(savedText, 0)
  }
+}
+
+function detectedHTML (textContent) {
+ var searchIndex = 0
+ var textSize = getValue(textContent, 'length')
+ while (firstGreater(textSize, searchIndex)) {
+  var currentCharacter = getValue(textContent, searchIndex)
+  if (areSame(currentCharacter, '<')) {
+   var character2 = getValue(textContent, addNumbers(searchIndex, 1))
+   var character3 = getValue(textContent, addNumbers(searchIndex, 2))
+   if (areSame(character2, 'h')) {
+    if (areSame(character3, 't')) {
+     return true
+    }
+   }
+   return false
+  }
+  if (arentSame(currentCharacter, ' ')) {
+   return false
+  }
+  searchIndex = addNumbers(searchIndex, 1)
+ }
+ return false
+}
+
+function createFooter () {
+ var footerElement = document.createElement('div')
+ body_node.prepend(footerElement)
+ nonline_elements = addNumbers(nonline_elements, 1)
+ var footerStyle = getValue(footerElement, 'style')
+ setValue(footerStyle, 'fontSize', '10px')
+ setValue(footerStyle, 'width', '1500px')
+ setValue(footerStyle, 'height', '21px')
+ setValue(footerStyle, 'position', 'fixed')
+ setValue(footerStyle, 'left', concatenateStrings(header_margin, 'px'))
+ setValue(footerStyle, 'top', '93%')
+ var button1 = document.createElement('input')
+ setValue(button1, 'type', 'button')
+ setValue(button1, 'value', 'External Paste')
+ setValue(button1, 'onclick', externalPaste)
+ footerElement.appendChild(button1)
+ paster_element = document.createElement('textarea')
+ paster_element.setAttribute('spellcheck', 'false')
+ footerElement.appendChild(paster_element)
+ var inputStyle = getValue(paster_element, 'style')
+ setValue(inputStyle, 'width', '1300px')
+ setValue(inputStyle, 'marginLeft', concatenateStrings(header_margin, 'px'))
+ setValue(inputStyle, 'height', '15px')
+ setValue(inputStyle, 'padding', '0px')
+ setValue(inputStyle, 'fontSize', '8px')
+}
+
+function externalPaste () {
+ var inputValue = getValue(paster_element, 'value')
+ if (inputValue) {
+  console.log('inputValue: ', inputValue)
+  copied_text = concatenateStrings(inputValue, '\n')
+  executePaste()
+ }
+ setValue(document, 'activeElement', body_node)
 }
 
 function createHeader () {
@@ -124,10 +186,22 @@ function createHeader () {
    var targetID = getValue(targetElement, 'id')
    if (areSame(targetID, 'click_1')) {
     var editorText = getContent()
-    var veditorProgram = getValue(document.getElementById(storage_name), 'outerHTML')
-    var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor" content="', editorText), '"></head><body>')
-    var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')
-    downloadFile(veditorHTML, 'index.html', 'html')
+    var textSize = getValue(editorText, 'length')
+    if (firstGreater(2, textSize)) {
+     return
+    }
+    var justContent = false
+    if (detectedHTML(editorText)) {
+     justContent = confirm('Only save the editor content as an HTML file.')
+    }
+    if (areSame(justContent, false)) {
+     var veditorProgram = getValue(document.getElementById('veditor_program'), 'outerHTML')
+     var veditorTop = concatenateStrings(concatenateStrings('<html><head><meta id="veditor" content="', editorText), '"></head><body>')
+     var veditorHTML = concatenateStrings(concatenateStrings(veditorTop, veditorProgram), '</body></html')     
+     downloadFile(veditorHTML, 'index.html', 'html')
+     return
+    }
+    downloadFile(editorText, 'index.html', 'html')
     return
    }
    if (areSame(targetID, 'click_2')) {
@@ -210,6 +284,9 @@ function executeAction (keyEvent) {
   keyEvent.preventDefault()
  }
  if (keyMuted(keyPressed)) {
+  return
+ }
+ if (areSame(getValue(document, 'activeElement'), paster_element)) {
   return
  }
  if (areSame(command_mode, false)) {
@@ -854,25 +931,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'p')) {
-  previous_state = getContent()
-  var lineAfter = getLine(current_y)
-  var searchIndex = 0
-  var copiedSize = getValue(copied_text, 'length')
-  var currentText = ''
-  while (firstGreater(copiedSize, searchIndex)) {
-   var currentCharacter = getValue(copied_text, searchIndex)
-   if (areSame(currentCharacter, '\n')) {
-    var nextCharacter = getValue(copied_text, addNumbers(searchIndex, 1))
-    if (notQuotation(nextCharacter)) {
-     var newLine = addLine(false, lineAfter)
-     setValue(newLine, 'innerHTML', toHTML(currentText))
-     currentText = ''
-     currentCharacter = ''
-    }
-   }
-   currentText = addNumbers(currentText, currentCharacter)
-   searchIndex = addNumbers(searchIndex, 1)
-  }
+  executePaste()
   return
  }
  if (areSame(keyPressed, 'f')) {
@@ -940,6 +999,28 @@ function executeCommand (keyPressed) {
  if (areSame(keyPressed, ':')) {
   search_mode = true
   return
+ }
+}
+
+function executePaste () {
+ previous_state = getContent()
+ var lineAfter = getLine(current_y)
+ var searchIndex = 0
+ var copiedSize = getValue(copied_text, 'length')
+ var currentText = ''
+ while (firstGreater(copiedSize, searchIndex)) {
+  var currentCharacter = getValue(copied_text, searchIndex)
+  if (areSame(currentCharacter, '\n')) {
+   var nextCharacter = getValue(copied_text, addNumbers(searchIndex, 1))
+   if (notQuotation(nextCharacter)) {
+    var newLine = addLine(false, lineAfter)
+    setValue(newLine, 'innerHTML', toHTML(currentText))
+    currentText = ''
+    currentCharacter = ''
+   }
+  }
+  currentText = addNumbers(currentText, currentCharacter)
+  searchIndex = addNumbers(searchIndex, 1)
  }
 }
 
