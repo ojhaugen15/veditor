@@ -192,7 +192,7 @@ function createHeader () {
     }
     var justContent = false
     if (detectedHTML(editorText)) {
-     justContent = confirm('Only save the editor content as an HTML file.')
+     justContent = confirm('Only save the editor content as an HTML file?')
     }
     if (areSame(justContent, false)) {
      var veditorProgram = getValue(document.getElementById('veditor_program'), 'outerHTML')
