@@ -221,10 +221,12 @@ function downloadFile (fileData, fileName, fileType) {
  var fileURL = URL.createObjectURL(fileElement)
  setValue(anchorElement, 'href', fileURL)
  setValue(anchorElement, 'download', fileName)
- body_node.appendChild(anchorElement)
+ nonline_elements = addNumbers(nonline_elements, 1)
+ body_node.prependChild(anchorElement)
  anchorElement.click()
  setTimeout(function() {
   body_node.removeChild(anchorElement)
+  nonline_elements = differenceNumbers(nonline_elements, 1)
   window.URL.revokeObjectURL(fileURL)
  }, 0)
 }
