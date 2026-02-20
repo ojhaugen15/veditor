@@ -255,7 +255,7 @@ function addLine (addAfter, addBefore) {
  setValue(line_style, 'whiteSpace', 'nowrap')
  //setValue(line_style, 'overflow', 'hidden')
  setValue(line_style, 'textOverflow', 'ellipsis')
- if (addAfter) {
+ if (arentSame(addAfter, false)) {
   var targetElement = getLine(addAfter)
   targetElement.after(new_line)
   return new_line
