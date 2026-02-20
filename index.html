@@ -667,6 +667,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, ';')) {
+  return
   var newProgram = getContent()
   var oldProgram = getElement(interior_program)
   if (arentSame(oldProgram, undefined)) {
@@ -938,6 +939,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, 'f')) {
+  return
   var searchIndex = current_x
   var currentText = getValue(current_line, 'textContent')
   var searchEnd = getValue(currentText, 'length')
@@ -1000,6 +1002,7 @@ function executeCommand (keyPressed) {
   return
  }
  if (areSame(keyPressed, ':')) {
+  return
   search_mode = true
   return
  }
