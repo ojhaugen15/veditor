@@ -1,7 +1,5 @@
 <html><head></head><body><script id='veditor_program'>
 //veditor
-
-console.log('TEST')
  
 character_width = 12.1
 font_size = 20
@@ -262,12 +260,7 @@ function addLine (addAfter, addBefore) {
   targetElement.after(new_line)
   return new_line
  }
- if (areSame(addAfter, 0)) {
-  var targetElement = getLine(addAfter)
-  targetElement.after(new_line)
-  return new_line
- }
- if (arentSame(addBefore, undefined)) {
+ if (addBefore) {
   body_node.insertBefore(new_line, addBefore)
   return new_line
  }
@@ -379,7 +372,7 @@ function executeEnter () {
   line2 = concatenateStrings(line2, currentCharacter)
   searchIndex = addNumbers(searchIndex, 1)
  }
- var newLine = addLine(current_y)
+ var newLine = addLine(getLine(current_y))
  setValue(current_line, 'innerHTML', toHTML(line1))
  setValue(newLine, 'innerHTML', toHTML(line2))
  current_y = addNumbers(current_y, 1)
@@ -1025,7 +1018,7 @@ function executePaste () {
   if (areSame(currentCharacter, '\n')) {
    var nextCharacter = getValue(copied_text, addNumbers(searchIndex, 1))
    if (notQuotation(nextCharacter)) {
-    var newLine = addLine(false, lineAfter)
+    var newLine = addLine(null, lineAfter)
     setValue(newLine, 'innerHTML', toHTML(currentText))
     currentText = ''
     currentCharacter = ''
