@@ -1,6 +1,8 @@
 <html><head></head><body><script id='veditor_program'>
 //veditor
- 
+
+console.log('test')
+
 character_width = 12.1
 font_size = 20
 font_color = 'white'
@@ -256,8 +258,7 @@ function addLine (addAfter, addBefore) {
  //setValue(line_style, 'overflow', 'hidden')
  setValue(line_style, 'textOverflow', 'ellipsis')
  if (addAfter) {
-  var targetElement = getLine(addAfter)
-  targetElement.after(new_line)
+  addAfter.after(new_line)
   return new_line
  }
  if (addBefore) {
